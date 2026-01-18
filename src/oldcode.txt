@@ -16,53 +16,62 @@
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // Motor declarations - DRIVETRAIN TAKEN CARE OF IN MOTORGROUP DECLARATIONS
-pros::Motor motorMainIntake(7);
-pros::Motor motorMeshRoller(-8);
-pros::Motor motorLastFlywheel(9);
+// Real declarations START HERE -------------------------------------------------------------------------------------------------<
+pros::Motor motorTopIntake(-14);
+pros::Motor motorTopIntake2(-16);
+pros::Motor motorMidIntake3(-17);
+pros::Motor motorMidIntake4(-8);
+pros::Motor motorBottomIntake5(-11);
+pros::Motor motorBottomIntake6(-12);
+// naming for intake goes: look at the back of the bot. 
+// Then go: high-->low, back-->front (of the bot), left--> right.
+// The priority goes in that order from 1-->6
 
 // Notebook: I can't put motors in a motor group with different gearsets as neccesitated by the mix of 11 and 5.5 watt motors in our drivetrain. Because of this, I run into a problem:
 // Potential fix: ignore issue since incorrectly describing a motor's gear ratio to pros will only mess with motor encoder values, which we will not be using anyways.
 pros::MotorGroup leftMotors({-1,-2,+3}); // left motor group - ports 1, 2, 3 (reversed)
 pros::MotorGroup rightMotors({4,5,-6}); // right motor group - ports 4, 5, 6 (reversed)
 pros::MotorGroup allDriveMotors({1,2,-3,4,5,-6}); //all the drivetrainmotors, with ports 3 and 6 reversed
-pros::MotorGroup allIntakeMotors({-7,-8}); //all the motors in the intake
+pros::MotorGroup allIntakeMotors({-14,-16,-17,-8,-11,-12}); //all the motors in the intake
 // configuring the drivetrain
 //PNEUMATICS
-pros::adi::DigitalOut descore('E'); //Pneumatics on port E
-pros::adi::DigitalOut hood('F'); //Pneumatics on port F
+pros::adi::DigitalOut descore('E'); //Pneumatics on port A
+
+
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
 
+
 // tracking wheels
-// horizontal tracking wheel encoder. Rotation sensor, port 19 not reversed
+// horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(19);
-// vertical tracking wheel encoder. Rotation sensor, port 20, reversed
+// vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc(20);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -6.25);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -7.83);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
-lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, 0.1875);
+lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, -0.14);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               &rightMotors, // right motor group
-                              11.625, //12.625 inch track width  
+                              12.125, //12.125 inch track width  
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
                               600, // drivetrain rpm is 600
-                              5 // horizontal drift is 2. If we had traction wheels, it would have been 8
+                              7 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(6, // proportional gain (kP)
-                                            0.01, // integral gain (kI)
-                                            4, // derivative gain (kD)
-                                            .5, // anti windup
-                                            0.1, // small error range, in inches
+lemlib::ControllerSettings linearController(10, // proportional gain (kP)
+                                            0, // integral gain (kI)
+                                            3, // derivative gain (kD)
+                                            3, // anti windup
+                                            1, // small error range, in inches
                                             100, // small error range timeout, in milliseconds
-                                            1, // large error range, in inches
+                                            3, // large error range, in inches
                                             500, // large error range timeout, in milliseconds
-                                            5 // maximum acceleration (slew)
+                                            20 // maximum acceleration (slew)
 );
 
 // angular motion controller
@@ -108,43 +117,61 @@ struct MoveParams {
 };
 void Matchload(void *param) {
     MoveParams* p = (MoveParams*)param;
+    motorTopIntake.move(127); 
+    motorTopIntake2.move(127); 
+    motorMidIntake3.move(127);
+    motorMidIntake4.move(-127); //reverse
+    motorBottomIntake5.move(127);
+    motorBottomIntake6.move(127);
     pros::delay(p->timeout);
-    allIntakeMotors.move(127); //Matchload
-    hood.set_value(true); //Hood deployed
-    motorLastFlywheel.move(0);
-}
-void scoreHighGoal(void *param) {
-    MoveParams* p = (MoveParams*)param;
-    pros::delay(p->timeout);
-    allIntakeMotors.move(127); //Matchload
-    hood.set_value(false); //Hood deployed
-    motorLastFlywheel.move(127); //Spin up last flywheel for high goal
+    allIntakeMotors.move(0);
 }
 void scoreMidGoal(void *param) {
     MoveParams* p = (MoveParams*)param;
+    motorTopIntake.move(127); 
+    motorTopIntake2.move(-127); //reverse
+    motorMidIntake3.move(127);
+    motorMidIntake4.move(-127); //reverse
+    motorBottomIntake5.move(-127);//reverse
+    motorBottomIntake6.move(127);
     pros::delay(p->timeout);
-    allIntakeMotors.move(127); //Matchload
-    hood.set_value(false); //Hood deployed
-    motorLastFlywheel.move(-127); //Spin down last flywheel for mid goal
+    allIntakeMotors.move(0);
+}
+void scoreTopGoal(void *param) {
+    MoveParams* p = (MoveParams*)param;
+    motorTopIntake.move(-127); //reverse
+    motorTopIntake2.move(127); 
+    motorMidIntake3.move(127);
+    motorMidIntake4.move(-127); //reverse
+    motorBottomIntake5.move(-127);//reverse
+    motorBottomIntake6.move(127);
+    pros::delay(p->timeout);
+    allIntakeMotors.move(0);
 
 }
 void scoreLowGoal(void *param) {
     MoveParams* p = (MoveParams*)param;
+    motorBottomIntake6.move(-127); 
+    //will always be in reverse:
+    motorBottomIntake5.move(-127);
+    //rest of the motors:
+    motorTopIntake.move(0); 
+    motorTopIntake2.move(0); //reverse
+    motorMidIntake3.move(0); //reverse
+    motorMidIntake4.move(-127); //reverse
     pros::delay(p->timeout);
-    allIntakeMotors.move(-127); //Matchload
-    hood.set_value(true); //Hood deployed
-    motorLastFlywheel.move(0);
+    allIntakeMotors.move(0);
 }
 void pneumatics_task(void* param) {
-    bool descore_state = false; // pneumatics start as retracted
-    bool hood_state = false; // pneumatics start as retracted
+    bool descore_state = false; // Track state
 
     while (true) {
-        // Toggle TONGUE on button press
+        // Toggle on button press
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-            descore_state = !descore_state; // Flip state
+            descore_state = !descore_state; // Flip the state
             descore.set_value(descore_state);
         }
+        
         pros::delay(20); // Faster response
     }
 }
@@ -177,7 +204,6 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            
           
             // log position telemetry
             lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
@@ -209,27 +235,12 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    static MoveParams matchloadParams;
-    /* Matchload, scoreHighGoal, scoreMidGoal, scoreLowGoal parameters
-    matchloadParams.timeout = XXXX; // run intake for XXXX MILIseconds - CAN BE CHANGED
-    pros::Task(Matchload, &matchloadParams); //don't change this
-    -- COPY AND PASTE THIS EVERY SINGLE TIME YOU WANT TO RUN THE INTAKE, AND CHANGE THE TIMEOUT ACCORDINGLY
-    */
     // this is for RED side
-    pros::lcd::print(4,"AUTO");
-    chassis.setPose(-46.676, -12.626, 180); // set starting position
-    chassis.moveToPoint(-46.676, -45.059, 3000);
-    chassis.turnToHeading(270, 1000);
-    chassis.moveToPose(-66, -43.059, 270, 1000);
-
-    // tunigg parameters for autonomous
-    /*
-    chassis.setPose(0,0,0);
-    chassis.moveToPose(0, 45, 0, 10000);
-    */
-    
-
-    
+    pros::lcd::print(4,"AUSTO");
+    chassis.setPose(-60.887, 17.025, 90);
+    MoveParams matchload_params = {5000.0}; // Run for 2000ms
+    pros::Task matchload_task_handle(Matchload, &matchload_params);
+    chassis.moveToPoint(-50.162, 17.131, 2000, {.maxSpeed=70});
 
 }
 
@@ -256,31 +267,86 @@ void opcontrol() {
 
         
         //*INTAKE*-----------------------------------------------<Added all sections of intake scoring 9/29/25>
-        
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){  //Matchload button
-           allIntakeMotors.move(127); //Matchload
-           hood.set_value(true); //Hood deployed
-           motorLastFlywheel.move(0);
+
+        // TOP GOAL
+        if (controller.get_digital(DIGITAL_L1)){
+            //stays constant in all except for low goal
+            motorBottomIntake6.move(127); //this one stays constant except for rev. (Low goal)
+            // SO we can outtake from storage:
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
+                motorBottomIntake5.move(-127);
+                motorBottomIntake6.move(1);
+            }
+            else {
+                motorBottomIntake5.move(127);
+                motorBottomIntake6.move(127);
+            }
+            //rest of the motors
+            motorTopIntake.move(-127); //reverse
+            motorTopIntake2.move(127); 
+            motorMidIntake3.move(127);
+            motorMidIntake4.move(-127); //reverse
+
+
+
+            
+            
         }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //High Goal button
-           allIntakeMotors.move(127); //Matchload
-           hood.set_value(false); //Hood deployed
-           motorLastFlywheel.move(127); //Spin up last flywheel for high goal
+            //STORAGE 
+        else if (controller.get_digital(DIGITAL_R2)) {
+            
+            motorBottomIntake6.move(127);
+            // SO we can outtake from storage:
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
+                motorBottomIntake5.move(-127);
+            }
+            else {
+                motorBottomIntake5.move(127);
+            }
+            //rest of the motors
+            motorTopIntake.move(127); 
+            motorTopIntake2.move(127); 
+            motorMidIntake3.move(127);
+            motorMidIntake4.move(-127); //reverse 
+            
         }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){ //Score Mid Goal button
-           allIntakeMotors.move(127); //Score Mid Goal
-           hood.set_value(false); //Hood retracted
-           motorLastFlywheel.move(-127); // Spin down last flywheel for goal
+        //LOW GOAL
+        else if (controller.get_digital(DIGITAL_R1)) {
+           // stays constant in all except for low goal --> THIS IS LOW GOAL
+            motorBottomIntake6.move(-127); 
+            //will always be in reverse:
+            motorBottomIntake5.move(-127);
+            //rest of the motors:
+            motorTopIntake.move(0); 
+            motorTopIntake2.move(0); //reverse
+            motorMidIntake3.move(0); //reverse
+            motorMidIntake4.move(-127); //reverse
         }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){ //Score Low Goal button
-           allIntakeMotors.move(-127); //Score Low Goal
-           hood.set_value(true); //Hood deployed
-           motorLastFlywheel.move(0); // Just don't spin this one
+        //MID GOAL
+        else if (controller.get_digital(DIGITAL_L2)) {
+            // stays constant in all except for low goal
+            
+            // SO we can outtake from storage:
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
+                motorBottomIntake5.move(-127);
+                motorBottomIntake6.move(1);
+            }
+            else {
+                motorBottomIntake5.move(127);
+                motorBottomIntake6.move(127);
+            }
+            //rest of the motors
+            motorTopIntake.move(127); 
+            motorTopIntake2.move(-127); //reverse
+            motorMidIntake3.move(127);
+            motorMidIntake4.move(-127); //reverse
         }
         else {
-           allIntakeMotors.move(0); //Stop intake motors if no buttons are pressed
-           motorLastFlywheel.move(0); //Stop last flywheel if no buttons are pressed
+            allIntakeMotors.move(0); //stops all motors when nothing is pressed
+
+        
         }
 
+
     }
-}
+} 

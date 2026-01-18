@@ -1,0 +1,14 @@
+1. For matchloading, don't spin the last roller, and have the hood down
+    - For middle goal scoring, spin everything, and spin the last roller down, and have the hood down
+    - For top goal scoring, spin everything, and spin the last roller up, while having the hood lifted
+    - For low goal scoring, spin everything in reverse, and don't spin the last roller, and have the hood down
+
+
+Steady state error:
+-48" = .0743
+-32" = .112
+-24" = .042
+-12" = .28
+ -5" = .77
+
+    

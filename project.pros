@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "RealProject1",
+    "project_name": "RealProject2",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -635,8 +635,8 @@
       }
     },
     "upload_options": {
-      "icon": "planet",
-      "slot": 5
+      "icon": "clawbot",
+      "slot": 4
     },
     "use_early_access": false
   }
