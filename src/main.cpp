@@ -210,12 +210,18 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  */
 void autonomous() {
     static MoveParams matchloadParams;
+    static MoveParams scoreHighGoalParams;
+    static MoveParams scoreMidgoalParams;
+    static MoveParams scoreLowGoalParams;
+
+
     /* Matchload, scoreHighGoal, scoreMidGoal, scoreLowGoal parameters
     matchloadParams.timeout = XXXX; // run intake for XXXX MILIseconds - CAN BE CHANGED
-    pros::Task(Matchload, &matchloadParams); //don't change this
+    pros::Task(Matchload, &matchloadParams); //don't change
     -- COPY AND PASTE THIS EVERY SINGLE TIME YOU WANT TO RUN THE INTAKE, AND CHANGE THE TIMEOUT ACCORDINGLY
     */
     // this is for RED side
+
     pros::lcd::print(4,"AUTO");
     chassis.setPose(-46.676, -12.626, 180); // set starting position
     chassis.moveToPoint(-46.676, -45.059, 3000);
@@ -237,7 +243,7 @@ void autonomous() {
  * Runs in driver control
  */
 void opcontrol() {
-   
+    int snapCounter = 0; // Counter to track how many times we've snapped the position
     // pneumatics controller
     pros::Task pneumatics_task_handle(pneumatics_task);
     // loop to continuously update ALL motors
@@ -246,8 +252,8 @@ void opcontrol() {
     while (true) {
         //*DIVE TRAIN*
         // get joystick positions   
-        int leftY   = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int leftY   = 0.8*controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightX = 0.8*controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         // move the chassis with curvature drive
         chassis.curvature(leftY,rightX);
         // delay to save resources
@@ -276,6 +282,14 @@ void opcontrol() {
            allIntakeMotors.move(-127); //Score Low Goal
            hood.set_value(true); //Hood deployed
            motorLastFlywheel.move(0); // Just don't spin this one
+        }
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)){ //Descore button
+           double snapPosx = chassis.getPose().x;
+           double snapPosy = chassis.getPose().y;
+           pros::lcd::print(3+snapCounter,"X: %f", snapPosx); // x
+           pros::lcd::print(4+snapCounter,"Y: %f", snapPosy); // y 
+           pros::delay(2500); // Wait 2.5 second before incrementing snapCounter to prevent doubleortripple clicks
+           snapCounter++;
         }
         else {
            allIntakeMotors.move(0); //Stop intake motors if no buttons are pressed
