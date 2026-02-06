@@ -1,0 +1,32 @@
+Aayush new code128
+
+ //aayush's new code starts here
+    chassis.setPose(-48.433, 16.998, 0); // set starting position    
+    chassis.moveToPoint(-48.433, 46.35, 3000);  //move infront of loader
+    chassis.turnToHeading(270, 1000);          //turn to face loader
+    //matchloader comes down
+    chassis.moveToPose(56.121, 46.35, 270, 1000);   //move to loader
+    //while u intake balls
+    //_______________________________________________________________________________________      intake here
+    matchloadParams.timeout = 4000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change this
+    //_______________________________________________________________________________________
+    chassis.moveToPose(-31.323, 46.35, 270, 1000);  //move to high goal
+    //outake balls: TEST VERSION BELOW
+    auto* highGoalParams = new MoveParams{500};
+    pros::Task(scoreHighGoal, highGoalParams);
+    //-----------------------------------
+    chassis.turnToHeading(160, 1000);   //turn towards the mid goal balls
+    chassis.moveToPose(-24.258, 26.767, 160, 1000);  //move to midgoal balls- to intake them
+     //__________       intake here
+    matchloadParams.timeout = 4000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change this
+    //_________
+    chassis.turnToHeading(320, 1000);   //turn towards the mid goal-- if this is a long turn make the angle -40
+    chassis.moveToPose(-12.44, 13.244, 270, 1000);  //move to midgoal to score
+    //test code to try and score midgoal below
+    auto* midGoalParams = new MoveParams{1000};
+    pros::Task(scoreMidGoal, midGoalParams);
+
+
+    //outtake to score

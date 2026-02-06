@@ -86,14 +86,14 @@ lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
 );
 
 // input curve for throttle input during driver control
-lemlib::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
+lemlib::ExpoDriveCurve throttleCurve(10, // joystick deadband out of 127
                                      10, // minimum output where drivetrain will move out of 127
                                      1.019 // expo curve gain
 );
 
 // input curve for steer input during driver control
-lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
-                                  10, // minimum output where drivetrain will move out of 127
+lemlib::ExpoDriveCurve steerCurve(15, // joystick deadband out of 127
+                                  15, // minimum output where drivetrain will move out of 127
                                   1.019 // expo curve gain
 );
 
@@ -209,6 +209,12 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
+    // tunigg parameters for autonomous
+    /*
+    chassis.setPose(0,0,0);
+    chassis.moveToPose(0, 45, 0, 10000);
+    */
+
     static MoveParams matchloadParams;
     static MoveParams scoreHighGoalParams;
     static MoveParams scoreMidgoalParams;
@@ -221,23 +227,41 @@ void autonomous() {
     -- COPY AND PASTE THIS EVERY SINGLE TIME YOU WANT TO RUN THE INTAKE, AND CHANGE THE TIMEOUT ACCORDINGLY
     */
     // this is for RED side
-
     pros::lcd::print(4,"AUTO");
     chassis.setPose(-46.676, -12.626, 180); // set starting position
     chassis.moveToPoint(-46.676, -45.059, 3000);
     chassis.turnToHeading(270, 1000);
     chassis.moveToPose(-66, -43.059, 270, 1000);
 
+
+    
+    
+   
+
+
+   
+
+
+
+
+
     // tunigg parameters for autonomous
     /*
     chassis.setPose(0,0,0);
     chassis.moveToPose(0, 45, 0, 10000);
     */
-    
+   
 
-    
+
+   
+
 
 }
+
+    
+
+    
+
 
 /**
  * Runs in driver control
@@ -252,8 +276,8 @@ void opcontrol() {
     while (true) {
         //*DIVE TRAIN*
         // get joystick positions   
-        int leftY   = 0.8*controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = 0.8*controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int leftY   = 0.93*controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightX = 0.93*controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         // move the chassis with curvature drive
         chassis.curvature(leftY,rightX);
         // delay to save resources
@@ -289,7 +313,7 @@ void opcontrol() {
            pros::lcd::print(3+snapCounter,"X: %f", snapPosx); // x
            pros::lcd::print(4+snapCounter,"Y: %f", snapPosy); // y 
            pros::delay(2500); // Wait 2.5 second before incrementing snapCounter to prevent doubleortripple clicks
-           snapCounter++;
+           snapCounter+=2;
         }
         else {
            allIntakeMotors.move(0); //Stop intake motors if no buttons are pressed
