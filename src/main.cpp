@@ -28,7 +28,7 @@ pros::MotorGroup allDriveMotors({1,2,-3,4,5,-6}); //all the drivetrainmotors, wi
 pros::MotorGroup allIntakeMotors({-7,-8}); //all the motors in the intake
 // configuring the drivetrain
 //PNEUMATICS
-pros::adi::DigitalOut descore('E'); //Pneumatics on port E
+pros::adi::DigitalOut descore('B'); //Pneumatics on port E
 pros::adi::DigitalOut hood('F'); //Pneumatics on port F
 
 // Inertial Sensor on port 10
@@ -227,11 +227,21 @@ void autonomous() {
     -- COPY AND PASTE THIS EVERY SINGLE TIME YOU WANT TO RUN THE INTAKE, AND CHANGE THE TIMEOUT ACCORDINGLY
     */
     // this is for RED side
-    pros::lcd::print(4,"AUTO");
+    /*pros::lcd::print(4,"AUTO");
     chassis.setPose(-46.676, -12.626, 180); // set starting position
-    chassis.moveToPoint(-46.676, -45.059, 3000);
-    chassis.turnToHeading(270, 1000);
-    chassis.moveToPose(-66, -43.059, 270, 1000);
+    chassis.moveToPoint(-46.676, -44.059, 1000);
+    chassis.turnToHeading(270, 750);
+    descore.set_value(true);
+    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change
+    chassis.moveToPoint(-66, -43.059, 1000);
+    pros::delay(2000);
+    chassis.moveToPoint(-31, -43.059,1000);
+    */
+    chassis.setPose(0,0,0);
+    chassis.moveToPoint(-6, 0, 1000);
+
+    
 
 
     
