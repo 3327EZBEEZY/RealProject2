@@ -39,7 +39,7 @@ pros::Imu imu(10);
 // horizontal tracking wheel encoder. Rotation sensor, port 19 not reversed
 pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 20, reversed
-pros::Rotation verticalEnc(20);
+pros::Rotation verticalEnc(-20);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -5.375);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
@@ -55,13 +55,13 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(6, // proportional gain (kP)
-                                            0.01, // integral gain (kI)
-                                            4, // derivative gain (kD)
-                                            .5, // anti windup
-                                            0.1, // small error range, in inches
+lemlib::ControllerSettings linearController(5, // proportional gain (kP)
+                                            0, // integral gain (kI)
+                                            0, // derivative gain (kD)
+                                            0, // anti windup
+                                            0.5, // small error range, in inches
                                             100, // small error range timeout, in milliseconds
-                                            1, // large error range, in inches
+                                            2, // large error range, in inches
                                             500, // large error range timeout, in milliseconds
                                             5 // maximum acceleration (slew)
 );
@@ -240,7 +240,7 @@ void autonomous() {
     chassis.moveToPoint(-31, -43.059,1000);
     */
     chassis.setPose(0,0,0);
-    chassis.moveToPoint(-6, 0, 1000);
+    chassis.moveToPoint(0, 36, 1000);
 
     
 
@@ -319,7 +319,7 @@ void opcontrol() {
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){ //Score Low Goal button
            allIntakeMotors.move(-127); //Score Low Goal
            hood.set_value(true); //Hood deployed
-           motorLastFlywheel.move(0); // Just don't spin this one
+           motorLastFlywheel.move(127); // Just don't spin this one
         }
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)){ //Descore button
            //update x and y position when snapped
