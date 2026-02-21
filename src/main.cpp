@@ -56,7 +56,7 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(6, // proportional gain (kP)
+lemlib::ControllerSettings linearController(7, // proportional gain (kP)
                                             0.0, // integral gain (kI)
                                             0, // derivative gain (kD)
                                             0, // anti windup
@@ -216,11 +216,7 @@ ASSET(example_txt); // '.' replaced with "_" to make c++ happy
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // tunigg parameters for autonomous
-    /*
-    chassis.setPose(0,0,0);
-    chassis.moveToPose(0, 45, 0, 10000);
-    */
+   
 
     static MoveParams matchloadParams;
     static MoveParams scoreHighGoalParams;
@@ -355,15 +351,15 @@ void autonomous() {
     */
 
 
-    
+
 
 
 
     // tunigg parameters for autonomous
-    /*
+
     chassis.setPose(0,0,0);
-    chassis.moveToPose(0, 45, 0, 10000);
-    */
+    chassis.moveToPose(0, 24, 0, 10000);
+    
    
 
 
