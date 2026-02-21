@@ -245,7 +245,105 @@ void autonomous() {
     pros::delay(2000);
     chassis.moveToPoint(-31, -43.059,1000);
     */
+    chassis.setPose(0,0,0);
+    chassis.moveToPoint(0,35,2000);
+    chassis.turnToPoint(8.27, 36.6,1000);
+
+    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change
+    chassis.moveToPoint(8.27,36.6,1000); //TONGUE goes to MATCHLOAD
+    chassis.moveToPoint(5.27,36.6,750);
+    chassis.moveToPoint(8.27,36.6,750);
+    pros::delay(2000);
+     //end of matchload
+
+    scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
+    pros::Task(scoreHighGoal,&scoreHighGoalParams);
+    chassis.moveToPoint(-20.58,36.09,1000); //move back and run intake
+    pros::delay(2000);
+    //end of first goal
+
+    chassis.moveToPoint(-14.7,36.09,1000);
+    chassis.turnToHeading(0, 1000); //(app. it moves -12,32.6)
+    chassis.moveToPoint(-13.2,48, 1000);
+    chassis.turnToHeading(-90, 1000); //(App. moves to -9,49.8)
+    chassis.moveToPoint(-93.1,53,1000);
+    chassis.turnToPoint(-106.9,39,500);
+    chassis.moveToPoint(-106.9, 39, 1000);
+    chassis.turnToPoint(-114.9,39, 1000);
+    //end of travel
+
+    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change
+    chassis.moveToPoint(-114.9,39,1000);//matchload
+    chassis.moveToPoint(-112,39,750);
+    chassis.moveToPoint(-114.9,39,750);
+    pros::delay(2000);
+     //end of matchload
+
+    scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
+    pros::Task(scoreHighGoal,&scoreHighGoalParams);
+    chassis.moveToPoint(-20.58,36.09,1000); //move back and run intake
+    pros::delay(2000);
+    chassis.moveToPoint(-86.9,39,1000); //move back and run intake
+    pros::delay(2000);
+    //end of second goal
+
+    chassis.moveToPoint(-98.67,39,1000);
+    chassis.turnToPoint(-104.68,-55.258,800);
+    chassis.moveToPoint(-104.68,-55.258,1500); //chassis aligned for repeat
+
+
+
+    //ROUND 2
+    chassis.setPose(0,0,0);
+    chassis.moveToPoint(0,35,2000);
+    chassis.turnToPoint(8.27, 36.6,1000);
+
+    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change
+    chassis.moveToPoint(8.27,36.6,1000); //TONGUE goes to MATCHLOAD
+    chassis.moveToPoint(5.27,36.6,750);
+    chassis.moveToPoint(8.27,36.6,750);
+    pros::delay(2000);
+     //end of matchload
+
+    scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
+    pros::Task(scoreHighGoal,&scoreHighGoalParams);
+    chassis.moveToPoint(-20.58,36.09,1000); //move back and run intake
+    pros::delay(2000);
+    //end of first goal
+
+    chassis.moveToPoint(-14.7,36.09,1000);
+    chassis.turnToHeading(0, 1000); //(app. it moves -12,32.6)
+    chassis.moveToPoint(-13.2,48, 1000);
+    chassis.turnToHeading(-90, 1000); //(App. moves to -9,49.8)
+    chassis.moveToPoint(-93.1,53,1000);
+    chassis.turnToPoint(-106.9,39,500);
+    chassis.moveToPoint(-106.9, 39, 1000);
+    chassis.turnToPoint(-114.9,39, 1000);
+    //end of travel
+
+    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change
+    chassis.moveToPoint(-114.9,39,1000);//matchload
+    chassis.moveToPoint(-112,39,750);
+    chassis.moveToPoint(-114.9,39,750);
+    pros::delay(2000);
+     //end of matchload
+
+    scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
+    pros::Task(scoreHighGoal,&scoreHighGoalParams);
+    chassis.moveToPoint(-20.58,36.09,1000); //move back and run intake
+    pros::delay(2000);
+    chassis.moveToPoint(-86.9,39,1000); //move back and run intake
+    pros::delay(2000);
+    //end of second goal
     
+    chassis.moveToPoint(-98.67,39,1000);
+    chassis.turnToPoint(-104.68,-55.258,800);
+    chassis.moveToPoint(-104.68,-55.258,1500); //chassis aligned for repeat
+
 
 
 
