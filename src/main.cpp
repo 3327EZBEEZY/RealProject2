@@ -31,6 +31,7 @@ pros::MotorGroup allIntakeMotors({-7,-8}); //all the motors in the intake
 //PNEUMATICS
 pros::adi::DigitalOut descore('B'); //Pneumatics on port E
 pros::adi::DigitalOut hood('F'); //Pneumatics on port F
+pros::adi::DigitalOut descore2('H'); //Pneumatics on port H
 
 // Inertial Sensor on port 10
 pros::Imu imu(10);
@@ -55,15 +56,15 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(5, // proportional gain (kP)
-                                            0, // integral gain (kI)
+lemlib::ControllerSettings linearController(6, // proportional gain (kP)
+                                            0.0, // integral gain (kI)
                                             0, // derivative gain (kD)
                                             0, // anti windup
                                             0.5, // small error range, in inches
-                                            100, // small error range timeout, in milliseconds
+                                            10000, // small error range timeout, in milliseconds
                                             2, // large error range, in inches
-                                            500, // large error range timeout, in milliseconds
-                                            5 // maximum acceleration (slew)
+                                            100000, // large error range timeout, in milliseconds
+                                            30 // maximum acceleration (slew)
 );
 
 // angular motion controller
@@ -139,12 +140,17 @@ void scoreLowGoal(void *param) {
 void pneumatics_task(void* param) {
     bool descore_state = false; // pneumatics start as retracted
     bool hood_state = false; // pneumatics start as retracted
+    bool descore2_state= false;
 
     while (true) {
         // Toggle TONGUE on button press
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
             descore_state = !descore_state; // Flip state
             descore.set_value(descore_state);
+        }
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+            descore2_state = !descore2_state; // Flip state
+            descore2.set_value(descore2_state);
         }
         pros::delay(20); // Faster response
     }
@@ -239,8 +245,18 @@ void autonomous() {
     pros::delay(2000);
     chassis.moveToPoint(-31, -43.059,1000);
     */
-    chassis.setPose(0,0,0);
-    chassis.moveToPoint(0, 36, 1000);
+    
+
+
+
+
+
+
+
+
+
+
+
 
     
 
@@ -278,10 +294,11 @@ void autonomous() {
  * Runs in driver control
  */
 void opcontrol() {
-    std::ofstream outFile("output.txt");
+    std::ofstream outFile("output.txt",std::ios::app);
     int snapCounter = 0; // Counter to track how many times we've snapped the position
     double snapPosx;
     double snapPosy;
+    double snapHeading;
     // pneumatics controller
     pros::Task pneumatics_task_handle(pneumatics_task);
     // loop to continuously update ALL motors
@@ -301,12 +318,12 @@ void opcontrol() {
         
         //*INTAKE*-----------------------------------------------<Added all sections of intake scoring 9/29/25>
         
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){  //Matchload button
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //Matchload button
            allIntakeMotors.move(127); //Matchload
            hood.set_value(true); //Hood deployed
-           motorLastFlywheel.move(0);
+           motorLastFlywheel.move(127);
         }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //High Goal button
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){  //High Goal button
            allIntakeMotors.move(127); //Matchload
            hood.set_value(false); //Hood deployed
            motorLastFlywheel.move(127); //Spin up last flywheel for high goal
@@ -319,20 +336,26 @@ void opcontrol() {
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){ //Score Low Goal button
            allIntakeMotors.move(-127); //Score Low Goal
            hood.set_value(true); //Hood deployed
-           motorLastFlywheel.move(127); // Just don't spin this one
+           motorLastFlywheel.move(0); // Just don't spin this one
         }
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)){ //Descore button
+        else if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ //Descore button
            //update x and y position when snapped
            snapPosx = chassis.getPose().x;
            snapPosy = chassis.getPose().y;
+           snapHeading = chassis.getPose().theta;
            //print to brain, new rows each time
-           pros::lcd::print(3+snapCounter,"X: %f", snapPosx); // x
-           pros::lcd::print(4+snapCounter,"Y: %f", snapPosy); // y 
+           pros::lcd::print(4+snapCounter,"X: %f", snapPosx); // x
+           pros::lcd::print(5+snapCounter,"Y: %f", snapPosy); // y 
+           pros::lcd::print(6+snapCounter,"Heading %d", snapHeading); // counter
            //print to output.txt
-           outFile << ": x = " << snapPosx << ", y = " << snapPosy << std::endl;
+           outFile << ": x = " << snapPosx << ", y = " << snapPosy << ", heading = " << snapHeading << std::endl;
            // Wait 2.5 second before incrementing snapCounter to prevent doubleortripple clicks
-           pros::delay(750); 
-           snapCounter+=2; //update counter so that printing doesn't overlap on the brain
+           //pros::delay(750); 
+           snapCounter+=3; //update counter so that printing doesn't overlap on the brain
+           if (snapCounter > 0) {
+              snapCounter = 0; //reset counter if it exceeds 6 to prevent overflow
+           }
+           
         }
         else {
            allIntakeMotors.move(0); //Stop intake motors if no buttons are pressed
