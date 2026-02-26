@@ -56,15 +56,15 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(7, // proportional gain (kP)
+lemlib::ControllerSettings linearController(11, // proportional gain (kP)
                                             0.0, // integral gain (kI)
-                                            0, // derivative gain (kD)
+                                            75, // derivative gain (kD)
                                             0, // anti windup
-                                            0.5, // small error range, in inches
-                                            10000, // small error range timeout, in milliseconds
-                                            2, // large error range, in inches
-                                            100000, // large error range timeout, in milliseconds
-                                            30 // maximum acceleration (slew)
+                                            0, // small error range, in inches
+                                            000000000, // small error range timeout, in milliseconds
+                                            0, // large error range, in inches
+                                            000000000, // large error range timeout, in milliseconds
+                                            127 // maximum acceleration (slew)
 );
 
 // angular motion controller
@@ -72,9 +72,9 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              10, // derivative gain (kD)
                                              3, // anti windup
-                                             1, // small error range, in degrees
+                                             0.7, // small error range, in degrees
                                              100, // small error range timeout, in milliseconds
-                                             3, // large error range, in degrees
+                                             1, // large error range, in degrees
                                              500, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
@@ -110,32 +110,49 @@ struct MoveParams {
 };
 void Matchload(void *param) {
     MoveParams* p = (MoveParams*)param;
-    pros::delay(p->timeout);
+    
     allIntakeMotors.move(127); //Matchload
     hood.set_value(true); //Hood deployed
     motorLastFlywheel.move(0);
+
+    //stop all motors after timeout
+    pros::delay(p->timeout);
+    allIntakeMotors.move(0);
+    
 }
 void scoreHighGoal(void *param) {
     MoveParams* p = (MoveParams*)param;
-    pros::delay(p->timeout);
+    
     allIntakeMotors.move(127); //Matchload
     hood.set_value(false); //Hood deployed
     motorLastFlywheel.move(127); //Spin up last flywheel for high goal
+
+    pros::delay(p->timeout);
+    allIntakeMotors.move(0); //Stop intake motors after timeout
+    motorLastFlywheel.move(0); //Stop last flywheel after timeout
 }
 void scoreMidGoal(void *param) {
     MoveParams* p = (MoveParams*)param;
-    pros::delay(p->timeout);
+    
     allIntakeMotors.move(127); //Matchload
     hood.set_value(false); //Hood deployed
     motorLastFlywheel.move(-127); //Spin down last flywheel for mid goal
 
+    pros::delay(p->timeout);
+    allIntakeMotors.move(0); //Stop intake motors after timeout
+    motorLastFlywheel.move(0); //Stop last flywheel after timeout
+
 }
 void scoreLowGoal(void *param) {
     MoveParams* p = (MoveParams*)param;
-    pros::delay(p->timeout);
+    
     allIntakeMotors.move(-127); //Matchload
     hood.set_value(true); //Hood deployed
     motorLastFlywheel.move(0);
+
+    pros::delay(p->timeout);
+    allIntakeMotors.move(0); //Stop intake motors after timeout
+    motorLastFlywheel.move(0); //Stop last flywheel after timeout
 }
 void pneumatics_task(void* param) {
     bool descore_state = false; // pneumatics start as retracted
@@ -224,16 +241,18 @@ void autonomous() {
     static MoveParams scoreLowGoalParams;
 
 
-    /* Matchload, scoreHighGoal, scoreMidGoal, scoreLowGoal parameters
+    /*Matchload, scoreHighGoal, scoreMidGoal, scoreLowGoal parameters
     matchloadParams.timeout = XXXX; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
     -- COPY AND PASTE THIS EVERY SINGLE TIME YOU WANT TO RUN THE INTAKE, AND CHANGE THE TIMEOUT ACCORDINGLY
     */
-    // this is for RED side
-    /*pros::lcd::print(4,"AUTO");
+    
+    // this is for RIGHT side
+    /*
+    pros::lcd::print(4,"AUTO");
     chassis.setPose(-46.676, -12.626, 180); // set starting position
     chassis.moveToPoint(-46.676, -44.059, 1000);
-    chassis.turnToHeading(270, 750);
+    chassis.turnToPoint(-66, -43.059, 1000);
     descore.set_value(true);
     matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
@@ -241,11 +260,29 @@ void autonomous() {
     pros::delay(2000);
     chassis.moveToPoint(-31, -43.059,1000);
     */
+    
+    // this is for LEFT side
+    /*
+    pros::lcd::print(4,"AUTO");
+    chassis.setPose(-46.676, -12.626, 180); // set starting position
+    chassis.moveToPoint(-46.676, -44.059, 1000);
+    chassis.turnToPoint(-27.4, -43.059, 1000);
+    descore.set_value(true);
+    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    pros::Task(Matchload, &matchloadParams); //don't change
+    chassis.moveToPoint(-27.4, -43.059, 1000);
+    pros::delay(2000);
+    chassis.moveToPoint(-31, -43.059,1000);
+    */
+
+    
 
 
 
 
-    /*SKILLS
+    //skills
+    
+    /*
     chassis.setPose(0,0,0);
     chassis.moveToPoint(0,35,2000);
     chassis.turnToPoint(8.27, 36.6,1000);
@@ -254,14 +291,14 @@ void autonomous() {
     matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
     chassis.moveToPoint(8.27,36.6,1000); //TONGUE goes to MATCHLOAD
-    chassis.moveToPoint(5.27,36.6,750);
+    chassis.moveToPose(5.27,36.6,90,750);
     chassis.moveToPoint(8.27,36.6,750);
     pros::delay(2000);
      //end of matchload
     
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPoint(-20.58,36.09,1000); //move back and run intake
+    chassis.moveToPose(-20.58,36.09,90,1000); //move back and run intake
     pros::delay(2000);
     descore.set_value(false);
     //end of first goal
@@ -279,7 +316,7 @@ void autonomous() {
     matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
     chassis.moveToPoint(-114.9,39,1000);//matchload
-    chassis.moveToPoint(-112,39,750);
+    chassis.moveToPose(-112,39,-90,750);
     chassis.moveToPoint(-114.9,39,750);
     pros::delay(2000);
      //end of matchload
@@ -287,7 +324,7 @@ void autonomous() {
     
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPoint(-86.9,39,1000); //move back and run intake
+    chassis.moveToPose(-86.9,39,-90,1000); //move back and run intake
     pros::delay(2000);
     descore.set_value(false);
     //end of second goal
@@ -307,16 +344,16 @@ void autonomous() {
     matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
     chassis.moveToPoint(8.27,36.6,1000); //TONGUE goes to MATCHLOAD
-    chassis.moveToPoint(5.27,36.6,750);
+    chassis.moveToPose(5.27,36.6,90,750);
     chassis.moveToPoint(8.27,36.6,750);
     pros::delay(2000);
      //end of matchload
 
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPoint(-20.58,36.09,1000); //move back and run intake
+    chassis.moveToPose(-20.58,36.09,90,1000); //move back and run intake
     pros::delay(2000);
-    descore.set_value(true);
+    descore.set_value(false);
     //end of first goal
 
     chassis.moveToPoint(-14.7,36.09,1000);
@@ -332,7 +369,7 @@ void autonomous() {
     matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
     chassis.moveToPoint(-114.9,39,1000);//matchload
-    chassis.moveToPoint(-112,39,750);
+    chassis.moveToPose(-112,39,-90,750);
     chassis.moveToPoint(-114.9,39,750);
     pros::delay(2000);
      //end of matchload
@@ -340,28 +377,31 @@ void autonomous() {
 
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPoint(-86.9,39,1000); //move back and run intake
+    chassis.moveToPose(-86.9,39,-90,1000); //move back and run intake
     pros::delay(2000);
     descore.set_value(false);
     //end of second goal
     
+
+    //parking
     chassis.moveToPoint(-98.67,39,1000);
-    chassis.turnToPoint(-104.68,-55.258,800);
-    chassis.moveToPoint(-104.68,-55.258,1500); 
+    chassis.turnToPoint(-104.68,16,800);
+    chassis.moveToPoint(-104.68,16,1500); 
+    chassis.turnToPoint(-113,16,1000);
+    chassis.moveToPoint(-113,16,1000);
+    scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
+    pros::Task(scoreHighGoal,&scoreHighGoalParams);
+    chassis.turnToPoint(-133,1,1000);
+    chassis.moveToPoint(-133,1,1000);
+    
+    
+
+
     */
-
-
-
-
-
-
-    // tunigg parameters for autonomous
-
-    chassis.setPose(0,0,0);
-    chassis.moveToPose(0, 24, 0, 10000);
     
    
-
+    chassis.setPose(0,0,0);
+    chassis.turnToHeading(90, 2000);
 
    
 
