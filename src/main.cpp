@@ -64,7 +64,7 @@ lemlib::ControllerSettings linearController(11, // proportional gain (kP)
                                             000000000, // small error range timeout, in milliseconds
                                             0, // large error range, in inches
                                             000000000, // large error range timeout, in milliseconds
-                                            127 // maximum acceleration (slew)
+                                            127 // maximum acceleration (slew) //127 USUALLY
 );
 
 // angular motion controller
@@ -76,7 +76,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              100, // small error range timeout, in milliseconds
                                              1, // large error range, in degrees
                                              500, // large error range timeout, in milliseconds
-                                             0 // maximum acceleration (slew)
+                                             127 // maximum acceleration (slew)
 );
 
 // sensors for odometry
@@ -401,10 +401,16 @@ void autonomous() {
     
    
     chassis.setPose(0,0,0);
-    chassis.turnToHeading(90, 2000);
-
-   
-
+    chassis.moveToPoint(0,-15,2000);
+    chassis.turnToPoint(0,0,1300);
+    chassis.moveToPoint(0,30,1000);
+    chassis.moveToPoint(0,-100,200);
+    chassis.moveToPoint(0,30,1000);
+    scoreHighGoalParams.timeout = 6000; // run intake for XXXX Miliseconds
+    pros::Task(scoreHighGoal,&scoreHighGoalParams);
+    pros::delay(2000);
+    chassis.turnToHeading(80,1000);
+    
 
 }
 
