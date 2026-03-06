@@ -42,7 +42,7 @@ pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 20, reversed
 pros::Rotation verticalEnc(-20);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, -5.375);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_2, 1.0625);
 
@@ -82,7 +82,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
 // sensors for odometry
 lemlib::OdomSensors sensors(&vertical, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
-                            &horizontal, // horizontal tracking wheel
+                            nullptr, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
                             &imu // inertial sensor
 );
@@ -201,6 +201,7 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
+            pros::lcd::print(3, "offset: %f", chassis.getPose().y/((chassis.getPose().theta/180.0)*M_PI)); // offset for vertical odometry wheel, useful for tuning
             
           
             // log position telemetry
@@ -436,10 +437,10 @@ void opcontrol() {
     while (true) {
         //*DIVE TRAIN*
         // get joystick positions   
-        int leftY   = 0.93*controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = 0.93*controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        int leftY   = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
         // move the chassis with curvature drive
-        chassis.curvature(leftY,rightX);
+        chassis.arcade(leftY,rightX,false, 0.3); // the last parameter is the turn sensitivity, which we may want to adjust
         // delay to save resources
         pros::delay(20);
         
