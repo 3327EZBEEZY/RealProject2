@@ -51,32 +51,32 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               &rightMotors, // right motor group
                               11.625, //12.625 inch track width  
                               lemlib::Omniwheel::NEW_325, // using new 4" omnis
-                              600, // drivetrain rpm is 600
+                              450, // drivetrain rpm is 450
                               5 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(11, // proportional gain (kP)
-                                            0.0, // integral gain (kI)
-                                            75, // derivative gain (kD)
-                                            0, // anti windup
-                                            0, // small error range, in inches
-                                            000000000, // small error range timeout, in milliseconds
-                                            0, // large error range, in inches
-                                            000000000, // large error range timeout, in milliseconds
-                                            127 // maximum acceleration (slew) //127 USUALLY
+lemlib::ControllerSettings linearController(6, // proportional gain (kP)
+                                            0, // integral gain (kI)
+                                            7, // derivative gain (kD)
+                                            2, // anti windup
+                                            1, // small error range, in inches
+                                            150, // small error range timeout, in milliseconds
+                                            3, // large error range, in inches
+                                            500, // large error range timeout, in milliseconds
+                                            40 // maximum acceleration (slew)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(2, // proportional gain (kP)
+lemlib::ControllerSettings angularController(3, // proportional gain (kP)
                                              0, // integral gain (kI)
-                                             10, // derivative gain (kD)
+                                             18, // derivative gain (kD)
                                              3, // anti windup
-                                             0.7, // small error range, in degrees
-                                             100, // small error range timeout, in milliseconds
-                                             1, // large error range, in degrees
+                                             1, // small error range, in degrees
+                                             150, // small error range timeout, in milliseconds
+                                             3, // large error range, in degrees
                                              500, // large error range timeout, in milliseconds
-                                             127 // maximum acceleration (slew)
+                                             20 // maximum acceleration (slew)
 );
 
 // sensors for odometry
@@ -201,7 +201,7 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            pros::lcd::print(3, "offset: %f", chassis.getPose().y/((chassis.getPose().theta/180.0)*M_PI)); // offset for vertical odometry wheel, useful for tuning
+            pros::lcd::print(3, "offset: %f", chassis.getPose().y/((chassis.getPose().theta/180.0)*2*M_PI)); // offset for vertical odometry wheel, useful for tuning
             
           
             // log position telemetry
@@ -283,23 +283,23 @@ void autonomous() {
 
     //skills
     
-    /*
-    chassis.setPose(0,0,0);
+    
+    chassis.setPose(0,5,0);
     chassis.moveToPoint(0,35,2000);
     chassis.turnToPoint(8.27, 36.6,1000);
 
     descore.set_value(true);
-    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    matchloadParams.timeout = 4000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
-    chassis.moveToPoint(8.27,36.6,1000); //TONGUE goes to MATCHLOAD
-    chassis.moveToPose(5.27,36.6,90,750);
-    chassis.moveToPoint(8.27,36.6,750);
-    pros::delay(2000);
+    chassis.moveToPoint(12.27,36.6,1000); //TONGUE goes to MATCHLOAD
+    chassis.moveToPose(8.27,36.6,90,750);
+    chassis.moveToPoint(12.27,36.6,750);
+    pros::delay(3000);
      //end of matchload
     
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPose(-20.58,36.09,90,1000); //move back and run intake
+    chassis.moveToPose(-20.58,36.09,90,1000,{.forwards=false}); //move back and run intake
     pros::delay(2000);
     descore.set_value(false);
     //end of first goal
@@ -307,37 +307,39 @@ void autonomous() {
     chassis.moveToPoint(-14.7,36.09,1000);
     chassis.turnToHeading(0, 1000); //(app. it moves -12,32.6)
     chassis.moveToPoint(-13.2,48, 1000);
-    chassis.turnToHeading(-90, 1000); //(App. moves to -9,49.8)
-    chassis.moveToPoint(-93.1,53,1000);
-    chassis.turnToPoint(-106.9,39,500);
-    chassis.moveToPoint(-106.9, 39, 1000);
-    chassis.turnToPoint(-114.9,39, 1000);
+    chassis.turnToPoint(-97.1,53,1000); //(App. moves to -9,49.8)
+    chassis.moveToPoint(-97.1,53,1000);
+    chassis.turnToPoint(-106.9,35,500);
+    chassis.moveToPoint(-106.9, 35, 1000);
+    chassis.turnToPoint(-114.9,35, 1000);
     //end of travel
     descore.set_value(true);
-    matchloadParams.timeout = 3000; // run intake for XXXX MILIseconds - CAN BE CHANGED
+    matchloadParams.timeout = 5000; // run intake for XXXX MILIseconds - CAN BE CHANGED
     pros::Task(Matchload, &matchloadParams); //don't change
-    chassis.moveToPoint(-114.9,39,1000);//matchload
-    chassis.moveToPose(-112,39,-90,750);
-    chassis.moveToPoint(-114.9,39,750);
+    chassis.moveToPoint(-114.9,35,1000);//matchload
+    chassis.moveToPose(-112,35,-90,750);
+    chassis.moveToPoint(-114.9,35,750);
     pros::delay(2000);
      //end of matchload
 
     
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPose(-86.9,39,-90,1000); //move back and run intake
-    pros::delay(2000);
+
+    chassis.moveToPose(-76.9,35,-90,1000,{.forwards=false}); //move back and run intake
+    pros::delay(3000);
     descore.set_value(false);
     //end of second goal
 
-    chassis.moveToPoint(-98.67,39,1000);
-    chassis.turnToPoint(-104.68,-55.258,800);
-    chassis.moveToPoint(-104.68,-55.258,1500); //chassis aligned for repeat
+    chassis.moveToPoint(-98.67,35,1000);
+    chassis.turnToPoint(-104.68,-55.258,2000);
+    chassis.moveToPoint(-104.68,-55.258,3000,{.forwards=true}); //chassis aligned for repeat
 
-
+    pros::delay(2000);
+    pros::lcd::print(4,"123123123");
 
     //ROUND 2
-    chassis.setPose(0,0,0);
+    chassis.setPose(0,4,0);
     chassis.moveToPoint(0,35,2000);
     chassis.turnToPoint(8.27, 36.6,1000);
     descore.set_value(true);
@@ -352,7 +354,7 @@ void autonomous() {
 
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPose(-20.58,36.09,90,1000); //move back and run intake
+    chassis.moveToPose(-20.58,36.09,90,1000,{.forwards=false}); //move back and run intake
     pros::delay(2000);
     descore.set_value(false);
     //end of first goal
@@ -378,7 +380,7 @@ void autonomous() {
 
     scoreHighGoalParams.timeout = 3000; // run intake for XXXX Miliseconds
     pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    chassis.moveToPose(-86.9,39,-90,1000); //move back and run intake
+    chassis.moveToPose(-86.9,39,-90,1000,{.forwards=false}); //move back and run intake
     pros::delay(2000);
     descore.set_value(false);
     //end of second goal
@@ -398,19 +400,21 @@ void autonomous() {
     
 
 
-    */
     
+    
+    /*
    
     chassis.setPose(0,0,0);
-    chassis.moveToPoint(0,-15,2000);
-    chassis.turnToPoint(0,0,1300);
-    chassis.moveToPoint(0,30,1000);
-    chassis.moveToPoint(0,-100,200);
-    chassis.moveToPoint(0,30,1000);
-    scoreHighGoalParams.timeout = 6000; // run intake for XXXX Miliseconds
-    pros::Task(scoreHighGoal,&scoreHighGoalParams);
-    pros::delay(2000);
-    chassis.turnToHeading(80,1000);
+    chassis.turnToHeading(60, 20000);
+    // 30: 2.3
+    // 45: 0.3
+    //60: 2.3
+    //90: 3.6
+
+    */
+
+    
+    
     
 
 }
